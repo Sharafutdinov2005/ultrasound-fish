@@ -10,7 +10,7 @@
 
 
 import cv2
-from cv2.typing import MatLike as MatLike
+from cv2.typing import MatLike
 from typing import Self
 from pathlib import Path
 import os
