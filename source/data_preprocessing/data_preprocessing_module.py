@@ -10,17 +10,16 @@
 
 
 import cv2
+import os
 from cv2.typing import MatLike
 from typing import Self
 from pathlib import Path
-import os
 
 
 class _VideoCaptureManager:
     """
     Auxiliary class to prevent the video capture object from leaking.
     """
-
     _video_address: str
     _capture: cv2.VideoCapture
 
@@ -31,18 +30,16 @@ class _VideoCaptureManager:
         """
         Initializes the video capture object.
         """
-
         self._validate_video_address(video_address)
         self._video_address = video_address
 
+    @staticmethod
     def _validate_video_address(
-        self,
         video_address: str = None
     ) -> None:
         """
         Validates the video address.
         """
-
         if not os.path.exists(video_address):
             raise FileNotFoundError(
                 f"The video address '{video_address}' does not exist."
@@ -62,7 +59,6 @@ class _VideoCaptureManager:
         """
         Initializes the video capture object when entering the context.
         """
-
         self._capture = cv2.VideoCapture(self._video_address)
         return self
 
@@ -73,143 +69,143 @@ class _VideoCaptureManager:
         """
         Releases the video capture object when exiting the context.
         """
-
         self._capture.release()
 
 
-class _FrameProcessor:
-    def _convert_to_single_channel(
-        self,
-        image: MatLike
-    ) -> MatLike:
-        """
-        Converts the image to a single channel.
-        """
-        if image.ndim == 3:
-            return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        return image
+def crop_image(
+    image: MatLike,
+    x: int = 63,
+    y: int = 18,
+    width: int = 386,
+    height: int = 424
+) -> MatLike:
+    return image[y:y + height, x:x + width]
 
 
-class DataSetPreProcessor(_FrameProcessor):
+def preprocess_frame(
+    image: MatLike
+) -> MatLike:
     """
-    Class to pre-process the videos in the dataset.
+    Pre-processes the frame.
     """
+    # TODO:
+    # - add Homomorphic Filtering
+    image = crop_image(image)
 
-    _directory_to_save: str
+    image = cv2.ximgproc.anisotropicDiffusion(image, 0.2, 0.1, 5)
 
-    def __init__(
-        self,
-        directory_to_save: str
-    ) -> None:
-        """
-        Initializes the data pre-processor.
-        """
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-        self._validate_directory(directory_to_save)
-        self._directory_to_save = directory_to_save
+    image = cv2.equalizeHist(image)
 
-    def _validate_directory(
-        self,
+    image = cv2.fastNlMeansDenoising(image, None, 20, 7, 21)
+
+    return image
+
+
+class DirectoryPreProcessor():
+    """
+    Class for pre-processing videos in the directory.
+    """
+    @staticmethod
+    def _validate_directory_to_save(
         directory: str
     ) -> None:
         """
-        Validates the directory to save the pre-processed data.
+        Validates the directory to save the pre-processed frames.
         """
-
         if not os.path.exists(directory):
             os.makedirs(directory)
         elif not os.path.isdir(directory):
             raise ValueError(f"The directory {directory} is not a directory.")
 
-    def preprocess_dataset(
-        self,
+    @staticmethod
+    def _validate_directory(
         directory: str
     ) -> None:
         """
-        Pre-processes all videos from the directory.\n
+        Validates the directory.
+        """
+        if not os.path.exists(directory):
+            raise ValueError(f"The directory {directory} does not exist.")
+
+    @staticmethod
+    def _validate_address(
+        address: str
+    ) -> None:
+        """
+        Validates the address.
+        """
+        if not os.path.exists(address):
+            raise ValueError(f"The address {address} does not exist.")
+
+    def preprocess_directory(
+        self,
+        directory: str,
+        directory_to_save: str
+    ) -> None:
+        """
+        Pre-processes all videos from the `directory` and saves them
+        to `directory_to_save`.\n
         This method doesn't check subdirectories.
         """
+        self._validate_directory(directory)
         pathlist = Path(directory).glob('*.mp4')
         for path in pathlist:
-            self.preprocess_video(str(path))
+            self.preprocess_video(str(path), directory_to_save)
 
     def preprocess_video(
         self,
-        video_address: str
+        video_address: str,
+        directory_to_save: str
     ) -> None:
         """
-        Pre-processes all frames from video and saves
-        them to a new directory.
+        Pre-processes all frames from `video_addres` and saves
+        them to a `directory_to_save`.
         """
-
+        self._validate_address(video_address)
+        self._validate_directory_to_save(directory_to_save)
         video_name = self._get_video_name(video_address)
         i = 0
         with _VideoCaptureManager(video_address) as manager:
             while True:
+                if i <= 15681:
+                    success, frame = manager.read()
+                    i += 1
+                    continue
                 success, frame = manager.read()
                 if not success:
                     break
-                self._save_frame(self._preprocess_frame(frame), video_name, i)
-                i += 1
-
-    def _preprocess_frame(
-        self,
-        frame: MatLike
-    ) -> MatLike:
-        """
-        Pre-processes a single frame.
-        """
-
-        frame = self._convert_to_single_channel(frame)
-        # do some pre-processing on the frame (e.g., resize, normalize)
-        return frame
-
-    def _save_frame(
-        self,
-        frame: MatLike,
-        video_name: str,
-        frame_number: int
-    ) -> None:
-        """
-        Saves the pre-processed frame to a new directory.
-        """
-
-        cv2.imwrite(
-                    f"{self._directory_to_save}/"
-                    f"{video_name}_frame_{frame_number}.jpg", frame
+                frame_name = f"{directory_to_save}/{video_name}_frame_{i}.jpg"
+                assert cv2.imwrite(
+                    frame_name,
+                    preprocess_frame(frame)
                 )
+                del frame
+                i += 1
 
     def _get_video_name(
         self,
         video_address: str
     ) -> str:
-        """Extracts the video name from the video address."""
-
+        """
+        Extracts the video name from the video address.
+        """
         video_name = ""
         for i in range(len(video_address) - 5, -1, -1):
-            if video_address[i] == "\\":
+            if video_address[i] == "/":
                 break
             video_name = video_address[i] + video_name
         return video_name
 
 
 if __name__ == "__main__":
-    video_address = (
-        'C:/Users/rusmi/Programming/Python/engeneering_workshop_spring_2025/'
-        'data_example/REC_Video_00000004.mp4'
-    )
+    pp = DirectoryPreProcessor()
 
-    directory_to_save = (
-        'C:/Users/rusmi/Programming/Python/'
-        'engeneering_workshop_spring_2025/'
-        'data_example/frames/'
-    )
+    # directory = input("Directory to process: ")
+    # directory_to_save = input("Directory to save: ")
 
-    directory = (
-        'C:/Users/rusmi/Programming/Python/'
-        'engeneering_workshop_spring_2025/'
-        'data_example/'
-    )
-
-    preprocessor = DataSetPreProcessor(directory_to_save)
-    preprocessor.preprocess_dataset(directory)
+    pp.preprocess_video(
+        'C:/Users/rusmi/Programming/Python/Ultrasound/'
+        'data_example/REC_Video_00000013.mp4',
+        'C:/Users/rusmi/Programming/Python/Ultrasound/data_example/frames')
