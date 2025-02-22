@@ -169,7 +169,7 @@ class DirectoryPreProcessor():
         i = 0
         with _VideoCaptureManager(video_address) as manager:
             while True:
-                if i <= 15681:
+                if i % 5 != 0:
                     success, frame = manager.read()
                     i += 1
                     continue
