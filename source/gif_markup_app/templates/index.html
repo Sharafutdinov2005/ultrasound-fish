@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GIF Markup App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        .gif-container {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            display: inline-block;
+            width: 30%;
+        }
+        .gif-container img {
+            max-width: 100%;
+            height: auto;
+        }
+        .tags {
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #555;
+        }
+        .button {
+            display: inline-block;
+            padding: 5px 10px;
+            margin: 5px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 3px;
+        }
+        .button.delete {
+            background-color: #dc3545;
+        }
+        .button:hover {
+            opacity: 0.8;
+        }
+        .flash-message {
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 3px;
+        }
+        .flash-message.success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .flash-message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <h1>GIF Markup App</h1>
+    <a href="{{ url_for('upload') }}" class="button">Upload .mp4 File</a>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash-message {{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <h2>Processed GIFs:</h2>
+    {% for gif in gifs %}
+        <div class="gif-container">
+            <img src="{{ url_for('static', filename='processed/' + gif.filename) }}" alt="{{ gif.filename }}">
+            <div class="tags">
+                <strong>Tags:</strong>
+                {% if gif.tags %}
+                    {{ gif.tags|join(', ') }}
+                {% else %}
+                    No tags yet.
+                {% endif %}
+            </div>
+            <a href="{{ url_for('markup', filename=gif.filename) }}" class="button">Markup</a>
+            <a href="{{ url_for('delete', filename=gif.filename) }}" class="button delete" onclick="return confirm('Are you sure you want to delete this GIF?')">Delete</a>
+        </div>
+    {% endfor %}
+</body>
+</html>

@@ -13,7 +13,7 @@ import cv2
 import os
 from cv2.typing import MatLike
 from typing import Self, Optional
-from numpy import mean as np_mean, array as np_array
+from numpy import mean as np_mean
 # from pathlib import Path
 from imageio import get_writer
 
@@ -26,7 +26,7 @@ _image_width = 386
 _image_height = 424
 
 # critical value of sum pixels in a frame
-_critical_value = 24
+_critical_value = 23
 
 
 def is_uninformative(
@@ -56,8 +56,7 @@ class _VideoCaptureContextManager:
         self._capture = video_capture
 
     def read(
-        self,
-        preprocess: bool = False
+        self
     ) -> tuple[bool, MatLike]:
         """
         Returns the next frame from the video.
@@ -94,7 +93,7 @@ class _VideoCaptureContextManager:
         Skips the uninformative frames.
         """
         while True:
-            success, frame = self.read(preprocess=True)
+            success, frame = self.read()
             if not success or not is_uninformative(frame):
                 return success, frame
 
@@ -200,28 +199,37 @@ class VideoToFrames(_VideoCutter):
         self._validate_directory_to_save(directory)
 
         number_of_frames = 0
+        number_of_fish = 0
+
+        directory_to_save = f"{directory}/{self._video_name}"
 
         with _VideoCaptureContextManager(self._capture) as capture:
             while True:
-                success, frame = capture.read()
+                success, frame = capture.skip_uninformative()
+
+                os.makedirs(
+                    f"{directory_to_save}/"
+                    f"fish_{number_of_fish}/"
+                )
 
                 if not success:
-                    break
+                    return
 
-                if is_uninformative(frame):
-                    continue
-
-                cv2.imwrite(
-                    f"{directory}/{self._video_name}_"
-                    f"frame_{number_of_frames}",
-                    frame if not preprocess else self._preprocess_frame(frame)
+                while success and not is_uninformative(frame):
+                    assert cv2.imwrite(
+                        f"{directory_to_save}/"
+                        f"fish_{number_of_fish}/"
+                        f"frame_{number_of_frames}.jpg",
+                        frame
+                        if not preprocess else
+                        self._preprocess_frame(frame)
                     )
+                    capture.skip()
+                    success, frame = capture.read()
+                    number_of_frames += 1
 
-                number_of_frames += 1
-
-                del frame
-
-                capture.skip(3)
+                number_of_frames = 0
+                number_of_fish += 1
 
 
 class VideoToGIF(_VideoCutter):
@@ -238,24 +246,27 @@ class VideoToGIF(_VideoCutter):
         """
         self._validate_directory_to_save(directory)
 
-        number_of_frames = 0
-        i = 0
+        number_of_fish = 0
 
         with _VideoCaptureContextManager(self._capture) as capture:
             while True:
                 success, frame = capture.skip_uninformative()
 
-                if not success or is_uninformative(frame):
-                    return number_of_frames
+                if not success:
+                    return
 
                 with get_writer(
-                    f"{directory}/fish_{i}.gif", mode='I', fps=30
+                    f"{directory}/fish_{number_of_fish}.gif", mode='I', fps=30
                 ) as writer:
                     while success and not is_uninformative(frame):
-                        writer.append_data(np_array(frame))
+                        writer.append_data(
+                            frame
+                            if not preprocess else
+                            self._preprocess_frame(frame)
+                        )
                         del frame
                         success, frame = capture.read()
-                i += 1
+                number_of_fish += 1
 
 
 # class DirectoryPreProcessor():
@@ -334,11 +345,21 @@ if __name__ == "__main__":
     # directory = input("Directory to process: ")
     # directory_to_save = input("Directory to save: ")
 
-    a = VideoToGIF(
+    # a = VideoToGIF(
+    #     'C:/Users/rusmi/Programming/Python/Ultrasound/'
+    #     'data_example/REC_Video_00000013.mp4'
+    # )
+
+    # a.save_GIFs_to_directory(
+    #     'C:/Users/rusmi/Programming/Python/Ultrasound/data_example/gifs_1'
+    # )
+
+    a = VideoToFrames(
         'C:/Users/rusmi/Programming/Python/Ultrasound/'
         'data_example/REC_Video_00000013.mp4'
     )
 
-    a.save_GIFs_to_directory(
-        'C:/Users/rusmi/Programming/Python/Ultrasound/data_example/gifs_1'
+    a.save_to_directory(
+        'C:/Users/rusmi/Programming/Python/Ultrasound/data_example/frms',
+        preprocess=False
     )
