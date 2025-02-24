@@ -78,7 +78,7 @@
             }
         </script>
         
-        <img id="gif" src="{{ url_for('static', filename='processed/' + filename) }}" alt="{{ filename }}" width="200" loop>
+        <img id="gif" src="{{ url_for('static', filename='processed/' + folder_name + '/' + filename) }}" alt="{{ filename }}" width="200" loop>
         <button onclick="restartGif()" class="button">Restart GIF</button>
     </div>
 
