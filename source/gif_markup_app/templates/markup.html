@@ -82,12 +82,12 @@
         <button onclick="restartGif()" class="button">Restart GIF</button>
     </div>
 
-    <div class="tags">
+    <div class="tags mt-3">
         <strong>Current Tags:</strong>
         {% if tags %}
             <ul>
-                {% for tag in tags %}
-                    <li>{{ tag }}</li>
+                {% for key, value in tags.items() %}
+                    <li><strong>{{ key }}:</strong> {{ value }}</li>
                 {% endfor %}
             </ul>
         {% else %}

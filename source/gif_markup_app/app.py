@@ -31,10 +31,14 @@ def preprocess_video(video_path, output_folder):
 
 def get_tags(filename, folder):
     tag_file = os.path.join(folder, f'{filename}.txt')
+    tags = {}
     if os.path.exists(tag_file):
         with open(tag_file, 'r') as f:
-            return f.read().splitlines()
-    return []
+            for line in f.readlines():
+                if ': ' in line:
+                    key, value = line.strip().split(': ', 1)
+                    tags[key] = value
+    return tags
 
 
 @app.route('/')
@@ -73,25 +77,39 @@ def markup(folder_name, filename):
         flash('Folder not found', 'error')
         return redirect(url_for('index'))
 
+    tag_file = os.path.join(folder_path, f'{filename}.txt')
+
     if request.method == 'POST':
         # Get selected values from the form
         gender = request.form.get('gender')
         stage = request.form.get('stage')
         anomaly = request.form.get('anomaly')
 
-        # Save the selected values to the tag file
-        tag_file = os.path.join(folder_path, f'{filename}.txt')
-        with open(tag_file, 'a') as f:
-            if gender:
-                f.write(f'Gender: {gender}\n')
-            if stage:
-                f.write(f'Stage: {stage}\n')
-            if anomaly:
-                f.write(f'Anomaly: {anomaly}\n')
+        # Read existing tags
+        tags = {}
+        if os.path.exists(tag_file):
+            with open(tag_file, 'r') as f:
+                for line in f.readlines():
+                    if ': ' in line:
+                        key, value = line.strip().split(': ', 1)
+                        tags[key] = value
+
+        # Update tags if new values are provided
+        if gender:
+            tags['Gender'] = gender
+        if stage:
+            tags['Stage'] = stage
+        if anomaly:
+            tags['Anomaly'] = anomaly
+
+        # Save the updated tags to the tag file
+        with open(tag_file, 'w') as f:
+            for key, value in tags.items():
+                f.write(f'{key}: {value}\n')
 
         flash('Markup saved successfully', 'success')
-        return redirect(
-            url_for('markup', folder_name=folder_name, filename=filename)
+        return redirect(url_for(
+            'markup', folder_name=folder_name, filename=filename)
         )
 
     # Read existing tags
