@@ -1,73 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GIF Markup App</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        h1 {
-            color: #333;
-        }
-        .button {
-            display: inline-block;
-            padding: 5px 10px;
-            background-color: #007bff;
-            color: white;
-            text-decoration: none;
-            border-radius: 3px;
-            margin: 5px;
-        }
-        .button:hover {
-            opacity: 0.8;
-        }
-        .folder-list {
-            margin-top: 20px;
-        }
-        .folder-list a {
-            display: block;
-            margin: 5px 0;
-            color: #007bff;
-            text-decoration: none;
-        }
-        .folder-list a:hover {
-            text-decoration: underline;
-        }
-        .flash-message {
-            padding: 10px;
-            margin-bottom: 20px;
-            border-radius: 3px;
-        }
-        .flash-message.success {
-            background-color: #d4edda;
-            color: #155724;
-        }
-        .flash-message.error {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-    </style>
-</head>
-<body>
-    <h1>GIF Markup App</h1>
-    <a href="{{ url_for('upload') }}" class="button">Upload .mp4 File</a>
+{% extends "base.html" %}
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="flash-message {{ category }}">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-
-    <h2>Select a Folder to Markup:</h2>
-    <div class="folder-list">
+{% block content %}
+    <h1 class="my-4">Select a Folder to Markup</h1>
+    <div class="list-group">
         {% for folder in processed_folders %}
-            <a href="{{ url_for('markup_folder', folder_name=folder) }}">{{ folder }}</a>
+            <a href="{{ url_for('markup_folder', folder_name=folder) }}" class="list-group-item list-group-item-action">
+                {{ folder }}
+            </a>
         {% endfor %}
     </div>
-</body>
-</html>
+{% endblock %}

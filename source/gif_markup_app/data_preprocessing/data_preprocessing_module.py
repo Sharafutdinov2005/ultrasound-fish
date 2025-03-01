@@ -1,20 +1,8 @@
-# This is an auxiliary class for data pre-processing.
-# It cuts all .mp4 files to frames, pre-processes them, and saves them in a
-# specified directory.
-#
-# It includes methods for
-#     extracting frames from videos,
-#     changing their color representation,
-#     applying denoising techniques,
-#     and improving image contrast.
-
-
 import cv2
 import os
 from cv2.typing import MatLike
 from typing import Self, Optional
 from numpy import mean as np_mean
-# from pathlib import Path
 from imageio import get_writer
 
 # upper left corner of the ultrasound
@@ -258,7 +246,21 @@ class VideoToGIF(_VideoCutter):
                 with get_writer(
                     f"{directory}/fish_{number_of_fish}.gif", mode='I', fps=30
                 ) as writer:
+                    number_of_frames = 0
+                    os.makedirs(
+                        f"{directory}/"
+                        f"fish_{number_of_fish}/",
+                        exist_ok=True
+                    )
                     while success and not is_uninformative(frame):
+                        assert cv2.imwrite(
+                            f"{directory}/"
+                            f"fish_{number_of_fish}/"
+                            f"frame_{number_of_frames}.jpg",
+                            frame
+                            if not preprocess else
+                            self._preprocess_frame(frame)
+                        )
                         writer.append_data(
                             frame
                             if not preprocess else
@@ -266,100 +268,5 @@ class VideoToGIF(_VideoCutter):
                         )
                         del frame
                         success, frame = capture.read()
+                        number_of_frames += 1
                 number_of_fish += 1
-
-
-# class DirectoryPreProcessor():
-#     """
-#     Class for pre-processing videos in the directory.
-#     """
-#     @staticmethod
-#     def _validate_directory_to_save(
-#         directory: str
-#     ) -> None:
-#         """
-#         Validates the directory to save the pre-processed frames.
-#         """
-#         if not os.path.exists(directory):
-#             os.makedirs(directory)
-#         elif not os.path.isdir(directory):
-#             raise ValueError(
-#             f"The directory {directory} is not a directory.")
-#     @staticmethod
-#     def _validate_directory(
-#         directory: str
-#     ) -> None:
-#         """
-#         Validates the directory.
-#         """
-#         if not os.path.exists(directory):
-#             raise ValueError(f"The directory {directory} does not exist.")
-#     @staticmethod
-#     def _validate_address(
-#         address: str
-#     ) -> None:
-#         """
-#         Validates the address.
-#         """
-#         if not os.path.exists(address):
-#             raise ValueError(f"The address {address} does not exist.")
-#     def preprocess_directory(
-#         self,
-#         directory: str,
-#         directory_to_save: str
-#     ) -> None:
-#         """
-#         Pre-processes all videos from the `directory` and saves them
-#         to `directory_to_save`.\n
-#         This method doesn't check subdirectories.
-#         """
-#         self._validate_directory(directory)
-#         pathlist = Path(directory).glob('*.mp4')
-#         for path in pathlist:
-#             self.preprocess_video(str(path), directory_to_save)
-#     def preprocess_video(
-#         self,
-#         video_address: str,
-#         directory_to_save: str
-#     ) -> None:
-#         """
-#         Pre-processes all frames from `video_addres` and saves
-#         them to a `directory_to_save`.
-#         """
-#         self._validate_address(video_address)
-#         self._validate_directory_to_save(directory_to_save)
-#         i = 0
-#         with _VideoCaptureContextManager(video_address) as manager:
-#             while True:
-#                 success, frame = manager.read()
-#                 i += 1
-#                 if not success:
-#                     break
-#                 if self._is_blank(frame):
-#                     pass
-#                 del frame
-
-
-if __name__ == "__main__":
-
-    # directory = input("Directory to process: ")
-    # directory_to_save = input("Directory to save: ")
-
-    # a = VideoToGIF(
-    #     'C:/Users/rusmi/Programming/Python/Ultrasound/'
-    #     'data_example/REC_Video_00000013.mp4'
-    # )
-
-    # a.save_GIFs_to_directory(
-    #     'C:/Users/rusmi/Programming/Python/Ultrasound/data_example/gifs_1'
-    # )
-
-    a = VideoToFrames(
-        'C:/Users/rusmi/Programming/Python/Ultrasound/'
-        'data_example/REC_Video_00000013.mp4'
-    )
-
-    a.save_to_directory(
-        'C:/Users/rusmi/Programming/Python/Ultrasound/data_example/frms',
-        preprocess=False
-    )

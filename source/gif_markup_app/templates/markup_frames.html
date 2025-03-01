@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1 class="my-4">Markup Frames for {{ filename }}</h1>
+    <a href="{{ url_for('markup_gif', folder_name=folder_name, filename=filename) }}" class="btn btn-secondary mb-4">Back to GIF</a>
+
+    <div class="row">
+        {% for frame in frames %}
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <img src="{{ url_for('static', filename='processed/' + folder_name + '/' + filename.split('.')[0] + '/' + frame) }}" class="card-img-top" alt="{{ frame }}">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ frame }}</h5>
+                        <form method="POST">
+                            <input type="hidden" name="frame_name" value="{{ frame }}">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="is_informative" id="informative_{{ frame }}" value="1" {% if frame_tags.get(frame) == 'Informative' %}checked{% endif %}>
+                                <label class="form-check-label" for="informative_{{ frame }}">
+                                    Informative
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="is_informative" id="not_informative_{{ frame }}" value="0" {% if frame_tags.get(frame) == 'Not Informative' %}checked{% endif %}>
+                                <label class="form-check-label" for="not_informative_{{ frame }}">
+                                    Not Informative
+                                </label>
+                            </div>
+                            <button type="submit" class="btn btn-primary mt-2">Save</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

@@ -1,90 +1,27 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Markup Folder: {{ folder_name }}</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        h1 {
-            color: #333;
-        }
-        .gif-container {
-            margin-bottom: 20px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            display: inline-block;
-            width: 30%;
-        }
-        .gif-container img {
-            max-width: 100%;
-            height: auto;
-        }
-        .tags {
-            margin-top: 10px;
-            font-size: 0.9em;
-            color: #555;
-        }
-        .button {
-            display: inline-block;
-            padding: 5px 10px;
-            margin: 5px;
-            background-color: #007bff;
-            color: white;
-            text-decoration: none;
-            border-radius: 3px;
-        }
-        .button.delete {
-            background-color: #dc3545;
-        }
-        .button:hover {
-            opacity: 0.8;
-        }
-        .flash-message {
-            padding: 10px;
-            margin-bottom: 20px;
-            border-radius: 3px;
-        }
-        .flash-message.success {
-            background-color: #d4edda;
-            color: #155724;
-        }
-        .flash-message.error {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-    </style>
-</head>
-<body>
-    <h1>Markup Folder: {{ folder_name }}</h1>
-    <a href="{{ url_for('index') }}" class="button">Back to Home</a>
+{% extends "base.html" %}
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="flash-message {{ category }}">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-
-    <h2>GIFs in this Folder:</h2>
-    {% for gif in gifs %}
-        <div class="gif-container">
-            <img src="{{ url_for('static', filename='processed/' + folder_name + '/' + gif.filename) }}" alt="{{ gif.filename }}" width="200" loop>
-            <div class="tags">
-                <strong>Tags:</strong>
-                {% if gif.tags %}
-                    {{ gif.tags|join(', ') }}
-                {% else %}
-                    No tags yet.
-                {% endif %}
+{% block content %}
+    <h1 class="my-4">Markup Folder: {{ folder_name }}</h1>
+    <div class="row">
+        {% for gif in gifs %}
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <img src="{{ url_for('static', filename='processed/' + folder_name + '/' + gif.filename) }}" class="card-img-top" alt="{{ gif.filename }}">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ gif.filename }}</h5>
+                        <div class="tags">
+                            <strong>Tags:</strong>
+                            {% if gif.tags %}
+                                {{ gif.tags|join(', ') }}
+                            {% else %}
+                                No tags yet.
+                            {% endif %}
+                        </div>
+                        <a href="{{ url_for('markup_gif', folder_name=folder_name, filename=gif.filename) }}" class="btn btn-primary btn-sm mt-2">Markup GIF</a>
+                        <a href="{{ url_for('markup_frames', folder_name=folder_name, filename=gif.filename) }}" class="btn btn-secondary btn-sm mt-2">Markup Frames</a>
+                    </div>
+                </div>
             </div>
-            <a href="{{ url_for('markup', folder_name=folder_name, filename=gif.filename) }}" class="button">Markup</a>
-        </div>
-    {% endfor %}
-</body>
-</html>
+        {% endfor %}
+    </div>
+{% endblock %}
