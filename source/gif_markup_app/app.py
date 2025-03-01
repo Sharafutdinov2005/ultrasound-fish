@@ -32,18 +32,25 @@ def get_tags(filename, folder):
     tags = {}
     if os.path.exists(tag_file):
         with open(tag_file, 'r') as f:
+            current_frame = None
             for line in f.readlines():
-                if ': ' in line:
-                    key, value = line.strip().split(': ', 1)
-                    tags[key] = value
+                line = line.strip()
+                if line.endswith(':'):  # Frame name
+                    current_frame = line[:-1]
+                    tags[current_frame] = {}
+                elif ': ' in line and current_frame:
+                    key, value = line.split(': ', 1)
+                    tags[current_frame][key] = value
     return tags
 
 
 def save_tags(filename, folder, tags):
     tag_file = os.path.join(folder, filename)
     with open(tag_file, 'w') as f:
-        for key, value in tags.items():
-            f.write(f'{key}: {value}\n')
+        for frame, frame_tags in tags.items():
+            f.write(f'{frame}:\n')
+            for key, value in frame_tags.items():
+                f.write(f'{key}: {value}\n')
 
 
 @app.route('/')
@@ -164,7 +171,6 @@ def markup_frames(folder_name, filename):
         return redirect(url_for('index'))
 
     # Extract the fish number from the filename
-    # (e.g., "fish_0.gif" -> "fish_0")
     fish_number = filename.split('.')[0]
     frames_folder = os.path.join(folder_path, fish_number)
     if not os.path.exists(frames_folder):
@@ -179,13 +185,28 @@ def markup_frames(folder_name, filename):
     if request.method == 'POST':
         # Get frame markup data
         frame_name = request.form.get('frame_name')
-        is_informative = request.form.get('is_informative')
+        gender_informative = request.form.get('gender_informative')
+        stage_informative = request.form.get('stage_informative')
+        anomaly_informative = request.form.get('anomaly_informative')
+        not_informative = request.form.get('not_informative')
 
-        # Save frame markup
+        # Read existing frame tags
         frame_tags = get_tags(f'{fish_number}_frames.txt', folder_path)
-        frame_tags[frame_name] = (
-            'Informative' if is_informative == 'true' else 'Not Informative'
-        )
+
+        # Update frame tags with new values
+        if frame_name not in frame_tags:
+            frame_tags[frame_name] = {}
+
+        if gender_informative:
+            frame_tags[frame_name]['Gender Informative'] = gender_informative
+        if stage_informative:
+            frame_tags[frame_name]['Stage Informative'] = stage_informative
+        if anomaly_informative:
+            frame_tags[frame_name]['Anomaly Informative'] = anomaly_informative
+        if not_informative:
+            frame_tags[frame_name]['Not Informative'] = not_informative
+
+        # Save the updated tags to the tag file
         save_tags(f'{fish_number}_frames.txt', folder_path, frame_tags)
 
         flash('Frame markup saved successfully', 'success')

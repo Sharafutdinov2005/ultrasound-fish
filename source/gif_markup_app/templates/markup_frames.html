@@ -13,18 +13,59 @@
                         <h5 class="card-title">{{ frame }}</h5>
                         <form method="POST">
                             <input type="hidden" name="frame_name" value="{{ frame }}">
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="is_informative" id="informative_{{ frame }}" value="1" {% if frame_tags.get(frame) == 'Informative' %}checked{% endif %}>
-                                <label class="form-check-label" for="informative_{{ frame }}">
-                                    Informative
-                                </label>
+
+                            <!-- Gender Informative -->
+                            <div class="form-group">
+                                <label>Gender Informative:</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="gender_informative" id="gender_informative_yes_{{ frame }}" value="Yes" {% if frame_tags.get(frame, {}).get('Gender Informative') == 'Yes' %}checked{% endif %}>
+                                    <label class="form-check-label" for="gender_informative_yes_{{ frame }}">Yes</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="gender_informative" id="gender_informative_no_{{ frame }}" value="No" {% if frame_tags.get(frame, {}).get('Gender Informative') == 'No' %}checked{% endif %}>
+                                    <label class="form-check-label" for="gender_informative_no_{{ frame }}">No</label>
+                                </div>
                             </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="is_informative" id="not_informative_{{ frame }}" value="0" {% if frame_tags.get(frame) == 'Not Informative' %}checked{% endif %}>
-                                <label class="form-check-label" for="not_informative_{{ frame }}">
-                                    Not Informative
-                                </label>
+
+                            <!-- Stage Informative -->
+                            <div class="form-group">
+                                <label>Stage Informative:</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="stage_informative" id="stage_informative_yes_{{ frame }}" value="Yes" {% if frame_tags.get(frame, {}).get('Stage Informative') == 'Yes' %}checked{% endif %}>
+                                    <label class="form-check-label" for="stage_informative_yes_{{ frame }}">Yes</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="stage_informative" id="stage_informative_no_{{ frame }}" value="No" {% if frame_tags.get(frame, {}).get('Stage Informative') == 'No' %}checked{% endif %}>
+                                    <label class="form-check-label" for="stage_informative_no_{{ frame }}">No</label>
+                                </div>
                             </div>
+
+                            <!-- Anomaly Informative -->
+                            <div class="form-group">
+                                <label>Anomaly Informative:</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="anomaly_informative" id="anomaly_informative_yes_{{ frame }}" value="Yes" {% if frame_tags.get(frame, {}).get('Anomaly Informative') == 'Yes' %}checked{% endif %}>
+                                    <label class="form-check-label" for="anomaly_informative_yes_{{ frame }}">Yes</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="anomaly_informative" id="anomaly_informative_no_{{ frame }}" value="No" {% if frame_tags.get(frame, {}).get('Anomaly Informative') == 'No' %}checked{% endif %}>
+                                    <label class="form-check-label" for="anomaly_informative_no_{{ frame }}">No</label>
+                                </div>
+                            </div>
+
+                            <!-- Not Informative -->
+                            <div class="form-group">
+                                <label>Not Informative:</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="not_informative" id="not_informative_yes_{{ frame }}" value="Yes" {% if frame_tags.get(frame, {}).get('Not Informative') == 'Yes' %}checked{% endif %}>
+                                    <label class="form-check-label" for="not_informative_yes_{{ frame }}">Yes</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="not_informative" id="not_informative_no_{{ frame }}" value="No" {% if frame_tags.get(frame, {}).get('Not Informative') == 'No' %}checked{% endif %}>
+                                    <label class="form-check-label" for="not_informative_no_{{ frame }}">No</label>
+                                </div>
+                            </div>
+
                             <button type="submit" class="btn btn-primary mt-2">Save</button>
                         </form>
                     </div>
