@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1 class="my-4">Select a Folder to Markup</h1>
+    <h1 class="my-4">Выберите видео для разметки</h1>
     <div class="list-group">
         {% for folder in processed_folders %}
             <a href="{{ url_for('markup_folder', folder_name=folder) }}" class="list-group-item list-group-item-action">

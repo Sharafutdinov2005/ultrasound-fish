@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1 class="my-4">Markup Frames for {{ filename }}</h1>
-    <a href="{{ url_for('markup_gif', folder_name=folder_name, filename=filename) }}" class="btn btn-secondary mb-4">Back to GIF</a>
+    <h1 class="my-4">Разметить кадры {{ filename }}</h1>
+    <a href="{{ url_for('markup_gif', folder_name=folder_name, filename=filename) }}" class="btn btn-secondary mb-4">Обратно к GIF</a>
 
     <div class="row">
         {% for frame in frames %}
@@ -16,57 +16,57 @@
 
                             <!-- Gender Informative -->
                             <div class="form-group">
-                                <label>Gender Informative:</label>
+                                <label>Возможность определить пол:</label>
                                 <div class="form-check">
                                     <input class="form-check-input" type="radio" name="gender_informative" id="gender_informative_yes_{{ frame }}" value="Yes" {% if frame_tags.get(frame, {}).get('Gender Informative') == 'Yes' %}checked{% endif %}>
-                                    <label class="form-check-label" for="gender_informative_yes_{{ frame }}">Yes</label>
+                                    <label class="form-check-label" for="gender_informative_yes_{{ frame }}">Есть</label>
                                 </div>
                                 <div class="form-check">
                                     <input class="form-check-input" type="radio" name="gender_informative" id="gender_informative_no_{{ frame }}" value="No" {% if frame_tags.get(frame, {}).get('Gender Informative') == 'No' %}checked{% endif %}>
-                                    <label class="form-check-label" for="gender_informative_no_{{ frame }}">No</label>
+                                    <label class="form-check-label" for="gender_informative_no_{{ frame }}">Нет</label>
                                 </div>
                             </div>
 
                             <!-- Stage Informative -->
                             <div class="form-group">
-                                <label>Stage Informative:</label>
+                                <label>Возможность определить стадию развития икры:</label>
                                 <div class="form-check">
                                     <input class="form-check-input" type="radio" name="stage_informative" id="stage_informative_yes_{{ frame }}" value="Yes" {% if frame_tags.get(frame, {}).get('Stage Informative') == 'Yes' %}checked{% endif %}>
-                                    <label class="form-check-label" for="stage_informative_yes_{{ frame }}">Yes</label>
+                                    <label class="form-check-label" for="stage_informative_yes_{{ frame }}">Есть</label>
                                 </div>
                                 <div class="form-check">
                                     <input class="form-check-input" type="radio" name="stage_informative" id="stage_informative_no_{{ frame }}" value="No" {% if frame_tags.get(frame, {}).get('Stage Informative') == 'No' %}checked{% endif %}>
-                                    <label class="form-check-label" for="stage_informative_no_{{ frame }}">No</label>
+                                    <label class="form-check-label" for="stage_informative_no_{{ frame }}">Нет</label>
                                 </div>
                             </div>
 
                             <!-- Anomaly Informative -->
                             <div class="form-group">
-                                <label>Anomaly Informative:</label>
+                                <label>Возможность определить аномалию:</label>
                                 <div class="form-check">
                                     <input class="form-check-input" type="radio" name="anomaly_informative" id="anomaly_informative_yes_{{ frame }}" value="Yes" {% if frame_tags.get(frame, {}).get('Anomaly Informative') == 'Yes' %}checked{% endif %}>
-                                    <label class="form-check-label" for="anomaly_informative_yes_{{ frame }}">Yes</label>
+                                    <label class="form-check-label" for="anomaly_informative_yes_{{ frame }}">Есть</label>
                                 </div>
                                 <div class="form-check">
                                     <input class="form-check-input" type="radio" name="anomaly_informative" id="anomaly_informative_no_{{ frame }}" value="No" {% if frame_tags.get(frame, {}).get('Anomaly Informative') == 'No' %}checked{% endif %}>
-                                    <label class="form-check-label" for="anomaly_informative_no_{{ frame }}">No</label>
+                                    <label class="form-check-label" for="anomaly_informative_no_{{ frame }}">Нет</label>
                                 </div>
                             </div>
 
                             <!-- Not Informative -->
                             <div class="form-group">
-                                <label>Not Informative:</label>
+                                <label>Кадр полностью бесполезен:</label>
                                 <div class="form-check">
                                     <input class="form-check-input" type="radio" name="not_informative" id="not_informative_yes_{{ frame }}" value="Yes" {% if frame_tags.get(frame, {}).get('Not Informative') == 'Yes' %}checked{% endif %}>
-                                    <label class="form-check-label" for="not_informative_yes_{{ frame }}">Yes</label>
+                                    <label class="form-check-label" for="not_informative_yes_{{ frame }}">Да</label>
                                 </div>
                                 <div class="form-check">
                                     <input class="form-check-input" type="radio" name="not_informative" id="not_informative_no_{{ frame }}" value="No" {% if frame_tags.get(frame, {}).get('Not Informative') == 'No' %}checked{% endif %}>
-                                    <label class="form-check-label" for="not_informative_no_{{ frame }}">No</label>
+                                    <label class="form-check-label" for="not_informative_no_{{ frame }}">Нет</label>
                                 </div>
                             </div>
 
-                            <button type="submit" class="btn btn-primary mt-2">Save</button>
+                            <button type="submit" class="btn btn-primary mt-2">Сохранить</button>
                         </form>
                     </div>
                 </div>

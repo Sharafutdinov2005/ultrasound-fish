@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1 class="my-4">Upload .mp4 File</h1>
+    <h1 class="my-4">Загрузить .mp4</h1>
     <form method="POST" enctype="multipart/form-data">
         <div class="mb-3">
-            <label for="file" class="form-label">Choose a .mp4 file:</label>
+            <label for="file" class="form-label">Выберите .mp4:</label>
             <input type="file" class="form-control" id="file" name="file" accept=".mp4">
         </div>
-        <button type="submit" class="btn btn-primary">Upload</button>
+        <button type="submit" class="btn btn-primary">Загрузить</button>
     </form>
 {% endblock %}

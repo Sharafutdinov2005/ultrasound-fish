@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1 class="my-4">Markup GIF: {{ filename }}</h1>
-    <a href="{{ url_for('markup_folder', folder_name=folder_name) }}" class="btn btn-secondary mb-4">Back to Folder</a>
+    <h1 class="my-4">Разметка GIF: {{ filename }}</h1>
+    <a href="{{ url_for('markup_folder', folder_name=folder_name) }}" class="btn btn-secondary mb-4">Обратно к папке</a>
 
     <div class="gif-container">
         <script>
@@ -13,11 +13,11 @@
         </script>
         
         <img id="gif" src="{{ url_for('static', filename='processed/' + folder_name + '/' + filename) }}" alt="{{ filename }}" width="200" loop>
-        <button onclick="restartGif()" class="btn btn-markup btn-primary">Restart GIF</button>
+        <button onclick="restartGif()" class="btn btn-markup btn-primary">Перезапустить GIF</button>
     </div>
 
     <div class="tags mt-3">
-        <strong>Current Tags:</strong>
+        <strong>Текущие метки:</strong>
         {% if tags %}
             <ul>
                 {% for key, value in tags.items() %}
@@ -25,37 +25,37 @@
                 {% endfor %}
             </ul>
         {% else %}
-            No tags yet.
+            Ещё нет меток.
         {% endif %}
     </div>
 
     <form method="POST" class="mt-4">
         <!-- Gender Buttons -->
         <div class="characteristic mb-4">
-            <h3>Gender:</h3>
-            <button type="submit" name="gender" value="male" class="btn btn-markup btn-primary">Male</button>
-            <button type="submit" name="gender" value="female" class="btn btn-markup btn-primary">Female</button>
-            <button type="submit" name="gender" value="can't tell" class="btn btn-markup btn-cant-tell">Can't Tell</button>
+            <h3>Пол:</h3>
+            <button type="submit" name="gender" value="male" class="btn btn-markup btn-primary">Самец</button>
+            <button type="submit" name="gender" value="female" class="btn btn-markup btn-primary">Самка</button>
+            <button type="submit" name="gender" value="can't tell" class="btn btn-markup btn-cant-tell">Не определить</button>
         </div>
 
         <!-- Stage of Development Buttons -->
         <div class="characteristic mb-4">
-            <h3>Stage of Development:</h3>
+            <h3>Стадия развития:</h3>
             <button type="submit" name="stage" value="2" class="btn btn-markup btn-primary">2</button>
             <button type="submit" name="stage" value="3" class="btn btn-markup btn-primary">3</button>
             <button type="submit" name="stage" value="4" class="btn btn-markup btn-primary">4</button>
-            <button type="submit" name="stage" value="rezorbation" class="btn btn-markup btn-primary">Rezorbation</button>
-            <button type="submit" name="stage" value="can't tell" class="btn btn-markup btn-cant-tell">Can't Tell</button>
+            <button type="submit" name="stage" value="rezorbation" class="btn btn-markup btn-primary">Резорбация</button>
+            <button type="submit" name="stage" value="can't tell" class="btn btn-markup btn-cant-tell">Не определить</button>
         </div>
 
         <!-- Anomaly Buttons -->
         <div class="characteristic mb-4">
-            <h3>Anomaly:</h3>
-            <button type="submit" name="anomaly" value="none" class="btn btn-markup btn-primary">None</button>
-            <button type="submit" name="anomaly" value="edema" class="btn btn-markup btn-primary">Edema</button>
-            <button type="submit" name="anomaly" value="double" class="btn btn-markup btn-primary">Hermaphroditism</button>
-            <button type="submit" name="anomaly" value="neoplasm" class="btn btn-markup btn-primary">Neoplasm</button>
-            <button type="submit" name="anomaly" value="can't tell" class="btn btn-markup btn-cant-tell">Can't tell</button>
+            <h3>Аномалии:</h3>
+            <button type="submit" name="anomaly" value="none" class="btn btn-markup btn-primary">Нет</button>
+            <button type="submit" name="anomaly" value="edema" class="btn btn-markup btn-primary">Отёк</button>
+            <button type="submit" name="anomaly" value="double" class="btn btn-markup btn-primary">Двуполость</button>
+            <button type="submit" name="anomaly" value="neoplasm" class="btn btn-markup btn-primary">Неоплазм</button>
+            <button type="submit" name="anomaly" value="can't tell" class="btn btn-markup btn-cant-tell">Не определить</button>
         </div>
     </form>
 {% endblock %}

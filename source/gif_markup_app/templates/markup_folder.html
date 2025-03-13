@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1 class="my-4">Markup Folder: {{ folder_name }}</h1>
+    <h1 class="my-4">Папка для разметки: {{ folder_name }}</h1>
     <div class="row">
         {% for gif in gifs %}
             <div class="col-md-4 mb-4">
@@ -14,11 +14,11 @@
                             {% if gif.tags %}
                                 {{ gif.tags|join(', ') }}
                             {% else %}
-                                No tags yet.
+                                Пока нет меток.
                             {% endif %}
                         </div>
-                        <a href="{{ url_for('markup_gif', folder_name=folder_name, filename=gif.filename) }}" class="btn btn-primary btn-sm mt-2">Markup GIF</a>
-                        <a href="{{ url_for('markup_frames', folder_name=folder_name, filename=gif.filename) }}" class="btn btn-secondary btn-sm mt-2">Markup Frames</a>
+                        <a href="{{ url_for('markup_gif', folder_name=folder_name, filename=gif.filename) }}" class="btn btn-primary btn-sm mt-2">Разметить GIF</a>
+                        <a href="{{ url_for('markup_frames', folder_name=folder_name, filename=gif.filename) }}" class="btn btn-secondary btn-sm mt-2">Разметить кадры</a>
                     </div>
                 </div>
             </div>
