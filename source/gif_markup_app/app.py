@@ -27,7 +27,7 @@ def preprocess_video(video_path, output_folder):
     gif_cutter.save_GIFs_to_directory(output_folder)
 
 
-def get_tags(filename, folder):
+def get_tags_frame(filename, folder):
     tag_file = os.path.join(folder, filename)
     tags = {}
     if os.path.exists(tag_file):
@@ -44,13 +44,32 @@ def get_tags(filename, folder):
     return tags
 
 
-def save_tags(filename, folder, tags):
+def save_tags_frame(filename, folder, tags):
     tag_file = os.path.join(folder, filename)
     with open(tag_file, 'w') as f:
         for frame, frame_tags in tags.items():
             f.write(f'{frame}:\n')
             for key, value in frame_tags.items():
                 f.write(f'{key}: {value}\n')
+
+
+def get_tags_gif(filename, folder):
+    tag_file = os.path.join(folder, filename)
+    tags = {}
+    if os.path.exists(tag_file):
+        with open(tag_file, 'r') as f:
+            for line in f.readlines():
+                if ': ' in line:
+                    key, value = line.strip().split(': ', 1)
+                    tags[key] = value
+    return tags
+
+
+def save_tags_gif(filename, folder, tags):
+    tag_file = os.path.join(folder, filename)
+    with open(tag_file, 'w') as f:
+        for key, value in tags.items():
+            f.write(f'{key}: {value}\n')
 
 
 @app.route('/')
@@ -112,7 +131,7 @@ def markup_folder(folder_name):
     gifs = []
     for f in os.listdir(folder_path):
         if f.startswith('fish_') and f.endswith('.gif'):
-            tags = get_tags(f'{f}.txt', folder_path)
+            tags = get_tags_gif(f'{f}.txt', folder_path)
             gifs.append({'filename': f, 'tags': tags})
     return render_template(
         'markup_folder.html',
@@ -135,7 +154,7 @@ def markup_gif(folder_name, filename):
         anomaly = request.form.get('anomaly')
 
         # Read existing tags
-        tags = get_tags(f'{filename}.txt', folder_path)
+        tags = get_tags_gif(f'{filename}.txt', folder_path)
 
         # Update tags if new values are provided
         if gender:
@@ -146,15 +165,20 @@ def markup_gif(folder_name, filename):
             tags['Anomaly'] = anomaly
 
         # Save the updated tags to the tag file
-        save_tags(f'{filename}.txt', folder_path, tags)
+        save_tags_gif(f'{filename}.txt', folder_path, tags)
 
         flash('Markup saved successfully', 'success')
         return redirect(
-            url_for('markup_gif', folder_name=folder_name, filename=filename)
+            url_for(
+                'markup_gif',
+                folder_name=folder_name,
+                filename=filename,
+                tags=tags
+            )
         )
 
     # Read existing tags
-    tags = get_tags(f'{filename}.txt', folder_path)
+    tags = get_tags_gif(f'{filename}.txt', folder_path)
     return render_template(
         'markup_gif.html',
         folder_name=folder_name,
@@ -191,7 +215,7 @@ def markup_frames(folder_name, filename):
         not_informative = request.form.get('not_informative')
 
         # Read existing frame tags
-        frame_tags = get_tags(f'{fish_number}_frames.txt', folder_path)
+        frame_tags = get_tags_frame(f'{fish_number}_frames.txt', folder_path)
 
         # Update frame tags with new values
         if frame_name not in frame_tags:
@@ -207,7 +231,7 @@ def markup_frames(folder_name, filename):
             frame_tags[frame_name]['Not Informative'] = not_informative
 
         # Save the updated tags to the tag file
-        save_tags(f'{fish_number}_frames.txt', folder_path, frame_tags)
+        save_tags_frame(f'{fish_number}_frames.txt', folder_path, frame_tags)
 
         flash('Frame markup saved successfully', 'success')
         return redirect(
@@ -217,7 +241,7 @@ def markup_frames(folder_name, filename):
         )
 
     # Read existing frame tags
-    frame_tags = get_tags(f'{fish_number}_frames.txt', folder_path)
+    frame_tags = get_tags_frame(f'{fish_number}_frames.txt', folder_path)
     return render_template(
         'markup_frames.html',
         folder_name=folder_name,
