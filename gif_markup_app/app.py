@@ -4,8 +4,8 @@ from datetime import datetime
 from data_preprocessing.data_preprocessing_module import VideoToGIF
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'source/gif_markup_app/static/uploads'
-app.config['PROCESSED_FOLDER'] = 'source/gif_markup_app/static/processed'
+app.config['UPLOAD_FOLDER'] = 'gif_markup_app/static/uploads'
+app.config['PROCESSED_FOLDER'] = 'gif_markup_app/static/processed'
 app.config['ALLOWED_EXTENSIONS'] = {'mp4'}
 app.secret_key = 'your_secret_key_here'
 
