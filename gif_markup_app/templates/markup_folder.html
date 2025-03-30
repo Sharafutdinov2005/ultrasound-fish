@@ -2,6 +2,23 @@
 
 {% block content %}
     <h1 class="my-4">Папка для разметки: {{ folder_name }}</h1>
+    
+    <!-- Прогресс-бар -->
+    <div class="progress-container mb-4">
+        <div class="progress">
+            <div class="progress-bar progress-bar-striped" 
+                 role="progressbar" 
+                 style="width: {{ (processed_count / total_count * 100) if total_count > 0 else 0 }}%;"
+                 aria-valuenow="{{ processed_count }}" 
+                 aria-valuemin="0" 
+                 aria-valuemax="{{ total_count }}">
+            </div>
+        </div>
+        <div class="progress-text text-center mt-1">
+            {{ processed_count }} из {{ total_count }} файлов размечено ({{ "%.1f"|format((processed_count / total_count * 100) if total_count > 0 else 0) }}%)
+        </div>
+    </div>
+
     <div class="row">
         {% for gif in gifs %}
             <div class="col-md-4 mb-4">
@@ -24,4 +41,34 @@
             </div>
         {% endfor %}
     </div>
+
+    <style>
+        .progress-container {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .progress {
+            height: 20px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+        }
+        .progress-bar {
+            background-color: #28a745;
+            transition: width 0.6s ease;
+        }
+        /* Динамическое изменение цвета в зависимости от прогресса */
+        .progress-bar[aria-valuenow^="0"] { background-color: #dc3545; } /* 0% */
+        .progress-bar[aria-valuenow^="1"] { background-color: #fd7e14; } /* 10-19% */
+        .progress-bar[aria-valuenow^="2"] { background-color: #ffc107; } /* 20-29% */
+        .progress-bar[aria-valuenow^="3"] { background-color: #ffc107; } /* 30-39% */
+        .progress-bar[aria-valuenow^="4"] { background-color: #17a2b8; } /* 40-49% */
+        .progress-bar[aria-valuenow^="5"] { background-color: #17a2b8; } /* 50-59% */
+        .progress-bar[aria-valuenow^="6"] { background-color: #007bff; } /* 60-69% */
+        .progress-bar[aria-valuenow^="7"] { background-color: #007bff; } /* 70-79% */
+        .progress-bar[aria-valuenow^="8"] { background-color: #28a745; } /* 80-89% */
+        .progress-bar[aria-valuenow^="9"] { background-color: #28a745; } /* 90-99% */
+        .progress-bar[aria-valuenow="100"] { background-color: #20c997; } /* 100% */
+    </style>
 {% endblock %}

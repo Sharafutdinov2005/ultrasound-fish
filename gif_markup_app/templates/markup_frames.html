@@ -4,10 +4,26 @@
     <h1 class="my-4">Разметить кадры {{ filename }}</h1>
     <a href="{{ url_for('markup_gif', folder_name=folder_name, filename=filename) }}" class="btn btn-secondary mb-4">Обратно к GIF</a>
 
+    <!-- Прогресс-бар -->
+    <div class="progress-container mb-4">
+        <div class="progress">
+            <div class="progress-bar" id="progressBar" role="progressbar" 
+                 style="width: {{ (marked_frames_count / frames|length) * 100 }}%; 
+                        background-color: {% if (marked_frames_count / frames|length) * 100 >= 80 %}#28a745{% elif (marked_frames_count / frames|length) * 100 >= 50 %}#ffc107{% else %}#dc3545{% endif %};" 
+                 aria-valuenow="{{ (marked_frames_count / frames|length) * 100 }}" 
+                 aria-valuemin="0" 
+                 aria-valuemax="100">
+            </div>
+        </div>
+        <div class="progress-text text-center mt-2">
+            <strong>Прогресс:</strong> {{ marked_frames_count }} из {{ frames|length }} кадров размечено ({{ "%.1f"|format((marked_frames_count / frames|length) * 100) }}%)
+        </div>
+    </div>
+
     <div class="row" id="frames-container">
         {% for frame in frames %}
             <div class="col-md-4 mb-4">
-                <div class="card">
+                <div class="card {% if frame_tags.get(frame, {}).get('saved') %}border-success{% endif %}">
                     <img src="{{ url_for('static', filename='processed/' + folder_name + '/' + filename.split('.')[0] + '/' + frame) }}" class="card-img-top" alt="{{ frame }}">
                     <div class="card-body">
                         <h5 class="card-title">{{ frame }}</h5>
@@ -75,51 +91,102 @@
         {% endfor %}
     </div>
 
+    <style>
+        .progress-container {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .progress {
+            height: 25px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            transition: width 0.3s ease, background-color 0.3s ease;
+        }
+        .progress-text {
+            font-size: 1.1em;
+        }
+    </style>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-        const forms = document.querySelectorAll('.save-form');
-        
-        forms.forEach(form => {
-            form.addEventListener('submit', async function(e) {
-                e.preventDefault();
-                
-                const formData = new FormData(this);
-                const saveBtn = this.querySelector('.save-btn');
-                const statusDiv = this.querySelector('.save-status');
-                const currentUrl = window.location.href; // Получаем текущий URL
-                
-                saveBtn.disabled = true;
-                saveBtn.textContent = 'Сохранение...';
-                
-                try {
-                    const response = await fetch(currentUrl, {  // Используем текущий URL
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest'
+            const forms = document.querySelectorAll('.save-form');
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.querySelector('.progress-text');
+            let markedCount = {{ marked_frames_count }};
+            const totalCount = {{ frames|length }};
+            
+            forms.forEach(form => {
+                form.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    const formData = new FormData(this);
+                    const saveBtn = this.querySelector('.save-btn');
+                    const statusDiv = this.querySelector('.save-status');
+                    const currentUrl = window.location.href;
+                    const card = this.closest('.card');
+                    
+                    saveBtn.disabled = true;
+                    saveBtn.textContent = 'Сохранение...';
+                    
+                    try {
+                        const response = await fetch(currentUrl, {
+                            method: 'POST',
+                            body: formData,
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        });
+                        
+                        const result = await response.json();
+                        
+                        if (result.status === 'success') {
+                            statusDiv.textContent = '✓ Успешно сохранено';
+                            statusDiv.style.display = 'block';
+                            setTimeout(() => statusDiv.style.display = 'none', 3000);
+                            
+                            // Обновляем прогресс-бар
+                            if (!card.classList.contains('border-success')) {
+                                markedCount++;
+                                updateProgressBar();
+                                card.classList.add('border-success');
+                            }
+                        } else {
+                            throw new Error('Ошибка сохранения');
                         }
-                    });
-                    
-                    const result = await response.json();
-                    
-                    if (result.status === 'success') {
-                        statusDiv.textContent = '✓ Успешно сохранено';
+                    } catch (error) {
+                        console.error('Ошибка:', error);
+                        statusDiv.textContent = '✗ Ошибка: ' + error.message;
+                        statusDiv.style.color = 'red';
                         statusDiv.style.display = 'block';
-                        setTimeout(() => statusDiv.style.display = 'none', 3000);
-                    } else {
-                        throw new Error('Ошибка сохранения');
+                    } finally {
+                        saveBtn.disabled = false;
+                        saveBtn.textContent = 'Сохранить';
                     }
-                } catch (error) {
-                    console.error('Ошибка:', error);
-                    statusDiv.textContent = '✗ Ошибка: ' + error.message;
-                    statusDiv.style.color = 'red';
-                    statusDiv.style.display = 'block';
-                } finally {
-                    saveBtn.disabled = false;
-                    saveBtn.textContent = 'Сохранить';
-                }
+                });
             });
+            
+            function updateProgressBar() {
+                const percentage = (markedCount / totalCount) * 100;
+                progressBar.style.width = `${percentage}%`;
+                progressBar.setAttribute('aria-valuenow', percentage);
+                
+                // Изменяем цвет в зависимости от прогресса
+                if (percentage >= 80) {
+                    progressBar.style.backgroundColor = '#28a745'; // Зеленый
+                } else if (percentage >= 50) {
+                    progressBar.style.backgroundColor = '#ffc107'; // Желтый
+                } else {
+                    progressBar.style.backgroundColor = '#dc3545'; // Красный
+                }
+                
+                // Обновляем текст
+                progressText.innerHTML = `<strong>Прогресс:</strong> ${markedCount} из ${totalCount} кадров размечено (${percentage.toFixed(1)}%)`;
+            }
         });
-    });
     </script>
 {% endblock %}

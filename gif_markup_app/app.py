@@ -29,9 +29,10 @@ def preprocess_video(video_path, output_folder):
     gif_cutter.save_GIFs_to_directory(output_folder)
 
 
-def get_tags_frame(filename, folder):
+def get_tags_frames(filename, folder):
     tag_file = os.path.join(folder, filename)
     tags = {}
+    marked = 0
     if os.path.exists(tag_file):
         with open(tag_file, 'r') as f:
             current_frame = None
@@ -40,10 +41,11 @@ def get_tags_frame(filename, folder):
                 if line.endswith(':'):  # Frame name
                     current_frame = line[:-1]
                     tags[current_frame] = {}
+                    marked += 1
                 elif ': ' in line and current_frame:
                     key, value = line.split(': ', 1)
                     tags[current_frame][key] = value
-    return tags
+    return tags, marked
 
 
 def save_tags_frame(filename, folder, tags):
@@ -131,14 +133,23 @@ def markup_folder(folder_name):
 
     # List all GIFs in the selected folder
     gifs = []
+    processed = 0
     for f in os.listdir(folder_path):
-        if f.startswith('fish_') and f.endswith('.gif'):
+        if (
+            f.startswith('fish_') and
+            f.endswith('.gif') and
+            not f.endswith('frames.gif')
+        ):
             tags = get_tags_gif(f'{f}.txt', folder_path)
             gifs.append({'filename': f, 'tags': tags})
+            if tags:
+                processed += 1
     return render_template(
         'markup_folder.html',
         folder_name=folder_name,
-        gifs=gifs
+        gifs=gifs,
+        total_count=len(gifs),
+        processed_count=processed
     )
 
 
@@ -218,7 +229,9 @@ def markup_frames(folder_name, filename):
         not_informative = request.form.get('not_informative')
 
         # Читаем существующие метки
-        frame_tags = get_tags_frame(f'{fish_number}_frames.txt', folder_path)
+        frame_tags, marked = get_tags_frames(
+            f'{fish_number}_frames.txt', folder_path
+        )
 
         # Обновляем метки
         if frame_name not in frame_tags:
@@ -246,13 +259,16 @@ def markup_frames(folder_name, filename):
                 )
             )
 
-    frame_tags = get_tags_frame(f'{fish_number}_frames.txt', folder_path)
+    frame_tags, marked = get_tags_frames(
+        f'{fish_number}_frames.txt', folder_path
+    )
     return render_template(
         'markup_frames.html',
         folder_name=folder_name,
         filename=filename,
         frames=frames,
-        frame_tags=frame_tags
+        frame_tags=frame_tags,
+        marked_frames_count=marked
     )
 
 
