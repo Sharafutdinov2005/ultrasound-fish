@@ -1,4 +1,6 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import (
+    Flask, render_template, request, redirect, url_for, flash, jsonify
+)
 import os
 from datetime import datetime
 from data_preprocessing.data_preprocessing_module import VideoToGIF
@@ -194,7 +196,6 @@ def markup_frames(folder_name, filename):
         flash('Folder not found', 'error')
         return redirect(url_for('index'))
 
-    # Extract the fish number from the filename
     fish_number = filename.split('.')[0]
     frames_folder = os.path.join(folder_path, fish_number)
     if not os.path.exists(frames_folder):
@@ -203,21 +204,23 @@ def markup_frames(folder_name, filename):
             url_for('markup_gif', folder_name=folder_name, filename=filename)
         )
 
-    # List all frames in the frames folder
     frames = [f for f in os.listdir(frames_folder) if f.endswith('.jpg')]
 
     if request.method == 'POST':
-        # Get frame markup data
+        # Проверяем AJAX-запрос
+        is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+
+        # Получаем данные формы
         frame_name = request.form.get('frame_name')
         gender_informative = request.form.get('gender_informative')
         stage_informative = request.form.get('stage_informative')
         anomaly_informative = request.form.get('anomaly_informative')
         not_informative = request.form.get('not_informative')
 
-        # Read existing frame tags
+        # Читаем существующие метки
         frame_tags = get_tags_frame(f'{fish_number}_frames.txt', folder_path)
 
-        # Update frame tags with new values
+        # Обновляем метки
         if frame_name not in frame_tags:
             frame_tags[frame_name] = {}
 
@@ -230,17 +233,19 @@ def markup_frames(folder_name, filename):
         if not_informative:
             frame_tags[frame_name]['Not Informative'] = not_informative
 
-        # Save the updated tags to the tag file
+        # Сохраняем метки
         save_tags_frame(f'{fish_number}_frames.txt', folder_path, frame_tags)
 
-        flash('Frame markup saved successfully', 'success')
-        return redirect(
-            url_for(
-                'markup_frames', folder_name=folder_name, filename=filename
+        if is_ajax:
+            return jsonify({'status': 'success'})
+        else:
+            flash('Frame markup saved successfully', 'success')
+            return redirect(
+                url_for(
+                    'markup_frames', folder_name=folder_name, filename=filename
+                )
             )
-        )
 
-    # Read existing frame tags
     frame_tags = get_tags_frame(f'{fish_number}_frames.txt', folder_path)
     return render_template(
         'markup_frames.html',

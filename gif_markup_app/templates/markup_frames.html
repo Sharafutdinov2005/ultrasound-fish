@@ -4,14 +4,14 @@
     <h1 class="my-4">Разметить кадры {{ filename }}</h1>
     <a href="{{ url_for('markup_gif', folder_name=folder_name, filename=filename) }}" class="btn btn-secondary mb-4">Обратно к GIF</a>
 
-    <div class="row">
+    <div class="row" id="frames-container">
         {% for frame in frames %}
             <div class="col-md-4 mb-4">
                 <div class="card">
                     <img src="{{ url_for('static', filename='processed/' + folder_name + '/' + filename.split('.')[0] + '/' + frame) }}" class="card-img-top" alt="{{ frame }}">
                     <div class="card-body">
                         <h5 class="card-title">{{ frame }}</h5>
-                        <form method="POST">
+                        <form method="POST" class="save-form" data-frame="{{ frame }}">
                             <input type="hidden" name="frame_name" value="{{ frame }}">
 
                             <!-- Gender Informative -->
@@ -66,11 +66,60 @@
                                 </div>
                             </div>
 
-                            <button type="submit" class="btn btn-primary mt-2">Сохранить</button>
+                            <button type="submit" class="btn btn-primary mt-2 save-btn">Сохранить</button>
+                            <div class="save-status mt-2" style="display: none; color: green;"></div>
                         </form>
                     </div>
                 </div>
             </div>
         {% endfor %}
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+        const forms = document.querySelectorAll('.save-form');
+        
+        forms.forEach(form => {
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                const saveBtn = this.querySelector('.save-btn');
+                const statusDiv = this.querySelector('.save-status');
+                const currentUrl = window.location.href; // Получаем текущий URL
+                
+                saveBtn.disabled = true;
+                saveBtn.textContent = 'Сохранение...';
+                
+                try {
+                    const response = await fetch(currentUrl, {  // Используем текущий URL
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.status === 'success') {
+                        statusDiv.textContent = '✓ Успешно сохранено';
+                        statusDiv.style.display = 'block';
+                        setTimeout(() => statusDiv.style.display = 'none', 3000);
+                    } else {
+                        throw new Error('Ошибка сохранения');
+                    }
+                } catch (error) {
+                    console.error('Ошибка:', error);
+                    statusDiv.textContent = '✗ Ошибка: ' + error.message;
+                    statusDiv.style.color = 'red';
+                    statusDiv.style.display = 'block';
+                } finally {
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = 'Сохранить';
+                }
+            });
+        });
+    });
+    </script>
 {% endblock %}
